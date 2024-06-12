@@ -1,0 +1,17 @@
+
+### Notes
+- there is currently no way to get multiple items at once. This is something HN is working on, we will revisit when it is available.
+
+### TODO
+- do something about rejected promises?
+
+
+add console.log errors on unfulilled promises
+
+- add a "next thread" with a date, or counter
+
+
+- change favicon
+
+- get date /month from title
+- add a warning button

@@ -1,0 +1,44 @@
+import { fetchWhoisUser, fetchItem } from "./fetch";
+import { useQuery } from "@tanstack/react-query";
+
+const TRIES = 10;
+
+export function useGetStory() {
+  let isError = false;
+  let isPending = true;
+  let error = null;
+  let data = null;
+
+  const whois = useQuery({ queryKey: ["whois"], queryFn: fetchWhoisUser });
+  if (whois.isError) {
+    error = whois.error;
+    isError = true;
+    isPending = false;
+  } else if (whois?.data?.data?.submitted) {
+    let loop = 0;
+    while (loop < TRIES) {
+      const itemId = whois.data.data.submitted[loop];
+      const post = useQuery({
+        queryKey: [itemId],
+        queryFn: () => fetchItem(itemId),
+      });
+      if (post.isError) {
+        error = post.error;
+        isError = true;
+        isPending = false;
+        break;
+      } else if (post.data?.data?.title) {
+        if (post.data.data.title.match(/Who is hiring?/)) data = post.data.data;
+        isPending = false;
+        break;
+      }
+
+      loop++;
+    }
+    if (data === null) {
+      error = { message: "Could not find a 'Who is hiring?' story." };
+      isPending = false;
+    }
+  }
+  return { data, error, isPending, isError };
+}

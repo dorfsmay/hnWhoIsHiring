@@ -1,0 +1,74 @@
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import * as t from "./types";
+import { fetchWhoisUser, fetchItem } from "./fetch";
+
+const TRIES = 10;
+
+
+
+export function useGetStory() {
+  const [loop, setLoop] = useState(0);
+  const [isError, setIsError] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const [error, setError] = useState<null | t.RequestError>(null);
+  const [submitted, setSubmitted] = useState<number[]>([]);
+    const [itemId, setItemId] useState()
+  const [data, setdata] = useState<t.HnItem>(null);
+
+  const whois = useQuery({ queryKey: ["whois"], queryFn: fetchWhoisUser });
+  if (whois.isError) {
+    setError(whois.error);
+    setIsError(true);
+    setIsPending(false);
+  } else if (whois?.data?.data?.submitted) {
+    setSubmitted(whois?.data?.data?.submitted);
+
+    /*
+    let loop = 0;
+    while (loop < TRIES) {
+      const itemId = whois.data.data.submitted[loop];
+      const post = useQuery({
+        queryKey: [itemId],
+        queryFn: () => fetchItem(itemId),
+      });
+      if (post.isError) {
+        error = post.error;
+        isError = true;
+        isPending = false;
+        break;
+      } else if (post.data?.data?.title) {
+        if (post.data.data.title.match(/Who is hiring?/)) data = post.data.data;
+        isPending = false;
+        break;
+      }
+
+      loop++;
+    }
+    if (data === null) {
+      error = { message: "Could not find a 'Who is hiring?' story." };
+      isPending = false;
+    }
+      */
+  } else {
+    setError({ message: "submitted missing" });
+    setIsError(true);
+    setIsPending(true);
+  }
+
+
+  useEffect(() => {
+    if (data === null && loop < TRIES) {
+      const itemId = submitted[loop];
+        console.log(itemId, loop)
+
+      setLoop((curr: number) => curr++);
+    }
+  }, [submitted, data, loop]);
+
+    useEffect(() => {
+    }, [])
+
+
+  return { data, error, isPending, isError };
+}
