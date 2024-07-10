@@ -43,4 +43,6 @@ export type post = {
   by: string;
   time: number;
   text: string;
+  header: string;
+  details: string[];
 };

@@ -2,8 +2,16 @@ import { useQueries } from "@tanstack/react-query";
 import * as t from "./types";
 import { fetchItem } from "./fetch";
 
+/*
+function splitText(text: string) {
+  const [header, ...details] = text.split("<p>", 2);
+}
+*/
+
+const reHtmlP = /(.+?)<p>(.+)/;
+
 export function useGetPosts(story: t.HnItem | null) {
-  const kids = story?.kids ? story?.kids.slice(0, 4) : [];
+  const kids = story?.kids ? story?.kids.slice(0, 10) : [];
 
   const commentsRequest = useQueries({
     queries: kids.map((itemId) => ({
@@ -21,11 +29,15 @@ export function useGetPosts(story: t.HnItem | null) {
     if (comment?.data?.data?.id) {
       const p = comment.data.data;
       if (p.text) {
+        const [, header, ...details] = p.text.match(reHtmlP);
+
         posts.push({
           id: p.id,
           by: p.by,
           time: p.time,
           text: p.text,
+          header,
+          details,
         });
         successfull.push(comment.data.data.id);
       } else failed.push(p.id);
